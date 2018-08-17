@@ -70,6 +70,7 @@ if __name__=="__main__":
 	
 	if len(sys.argv)<2:
 		show()
+		sys.exit(0)
 
 	try:
 			if re.match(r"^([0-9]{1,3}\.){3}[0-9]{1,3}$",str(sys.argv[1])):
