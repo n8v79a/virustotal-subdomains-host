@@ -59,7 +59,7 @@ config = {"Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/searc
 def getip_address(url):
 	headers = {"user-agent": random.choice(list(config))}
 	req = requests.get("http://ip.soshoulu.com/ajax/shoulu.ashx?_type=ipsearch&ip="+str(url),headers=headers)
-	print str(req.text).split('$')[0].encode(encoding='GBK',errors='strict')
+	print str(req.text).split('$')[0].encode(encoding='GBK',errors='strict')+"\t"+url
   	
 def show():
 
