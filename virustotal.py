@@ -62,8 +62,7 @@ def getJson(url,cursor="",pan="1"):
             url = "https://www.virustotal.com/ui/domains/%s/resolutions?cursor=%s"%(url,cursor)
     if pan == "2":#二级域名
         url = "https://www.virustotal.com/ui/domains/%s/subdomains" % (url)
-    headers = {"user-agent":random.choice(list(config))} #随机user-agent
-    req = requests.get(url,verify=True,headers=headers)
+    #判断递归url   
     if pan == "1":
         return getHost(url)
     if pan == "2":
@@ -79,7 +78,7 @@ def getHost(url):
         for val in js['data']:
              listJson.append(val['attributes'])
         next = js['links']['next']
-        getHost(next)
+        getHost(next) #递归
     except KeyError:
         pass
 
@@ -95,7 +94,7 @@ def getSubdomains(url):
         for val in js['data']:
             listJson.append(val['id'])
         next = js['links']['next']
-        getSubdomains(next)
+        getSubdomains(next) #递归
     except KeyError:
         pass
 
