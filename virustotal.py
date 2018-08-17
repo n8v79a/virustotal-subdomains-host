@@ -105,7 +105,7 @@ def show():
 if __name__ == "__main__":
     if(len(sys.argv)<3):
         show()
-        sys,exit(1)
+        sys.exit(1)
     if  str(sys.argv[2])=="2":
         getJson(str(sys.argv[1]), pan=str(sys.argv[2]))
         for val in listJson:
