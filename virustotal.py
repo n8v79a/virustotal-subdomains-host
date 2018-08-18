@@ -18,7 +18,8 @@ import re
 import random
 import base64
 import sys
-
+reload(sys)
+sys.setdefaultencoding('utf-8') 
 config = {"Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html）",
             "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
             "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html) ",
@@ -98,6 +99,12 @@ def getSubdomains(url):
     except KeyError:
         pass
 
+
+def getip_address(ip):
+	headers = {"user-agent": random.choice(list(config))}
+	req = requests.get("http://ip.soshoulu.com/ajax/shoulu.ashx?_type=ipsearch&ip="+str(ip),headers=headers)
+	return str(req.text).split('$')[0].encode(encoding='GBK',errors='strict')+"\t"+str(ip)
+
 def show():
     banner ="CiBfICAgXyBfICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBfICAgICAgICAgICAgICAgICAgICAgICBfICAgICAgIAp8IFwgfCB8IHxfIF9fXyAgX18gXyBfIF9fIF9fXyAgICAgICAgX198IHwgX19fICBfIF9fIF9fXyAgIF9fIF8oXylfIF9fICAKfCAgXHwgfCBfXy8gXyBcLyBfYCB8ICdfXy8gX198X19fX18gLyBfYCB8LyBfIFx8ICdfIGAgXyBcIC8gX2AgfCB8ICdfIFwgCnwgfFwgIHwgfHwgIF9fLyAoX3wgfCB8ICBcX18gXF9fX19ffCAoX3wgfCAoXykgfCB8IHwgfCB8IHwgKF98IHwgfCB8IHwgfAp8X3wgXF98XF9fXF9fX3xcX18sX3xffCAgfF9fXy8gICAgICBcX18sX3xcX19fL3xffCB8X3wgfF98XF9fLF98X3xffCB8X3wK"
     print base64.b64decode(banner)
@@ -114,7 +121,7 @@ if __name__ == "__main__":
     	getJson(str(sys.argv[1]), pan=str(sys.argv[2]))
         if re.match(r"^([0-9]{1,3}\.){3}[0-9]{1,3}$",str(sys.argv[1])):
             for val in listJson:
-                print "%s"%(val['host_name'])
+                print "%s"%(val['host_name']) 	
         else:
             for val in listJson:
-                print "%s"%(val['ip_address'])
+                print "%s"%(getip_address(str(val['ip_address'])))
