@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
+ #-*- coding: utf-8 -*-
 """
 -------------------------------------------------
-   File Name：     test
+   File Name：     virustotal
    Description :
    Author :       Ntears
    date：          2018/8/16
--------------------------------------------------
-   Change Activity:
-                   2018/8/16:
--------------------------------------------------
 """
 __author__ = 'Ntears'
 
@@ -18,6 +14,7 @@ import re
 import random
 import base64
 import sys
+import time
 reload(sys)
 sys.setdefaultencoding('utf-8') 
 config = {"Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/search/spider.html）",
@@ -29,8 +26,8 @@ config = {"Mozilla/5.0 (compatible; Baiduspider/2.0; +http://www.baidu.com/searc
             "Mozilla/5.0 (compatible; Yahoo! Slurp; http://help.yahoo.com/help/us/ysearch/slurp”) ",
             "iaskspider/2.0(+http://iask.com/help/help_index.html”) ",
             "Mozilla/5.0 (compatible; iaskspider/1.0; MSIE 6.0) ",
-            "Sogou web spider/3.0(+http://www.sogou.com/docs/help/webmasters.htm#07″) ",
-            "Sogou Push Spider/3.0(+http://www.sogou.com/docs/help/webmasters.htm#07″) ",
+            "Sogou web spider/3.0(+http://www.sogou.com/docs/help/webmasters.htm07″) ",
+            "Sogou Push Spider/3.0(+http://www.sogou.com/docs/help/webmasters.htm07″) ",
             "Mozilla/5.0 (compatible; YodaoBot/1.0; http://www.yodao.com/help/webmaster/spider/”; ) ",
             "msnbot/1.0 (+http://search.msn.com/msnbot.htm”)",
             "Mozilla/5.0 (Linux;u;Android 4.2.2;zh-cn;) ",
@@ -67,7 +64,7 @@ def getJson(url,cursor="",pan="1"):
     if pan == "1":
         return getHost(url)
     if pan == "2":
-        return getSubdomains(url)
+        return getvt_subdomains(url)
 
 listJson = []
 #ip反查
@@ -86,8 +83,8 @@ def getHost(url):
 
 
 #二级域名
-def getSubdomains(url):
-   # url = "https://www.virustotal.com/ui/domains/%s/subdomains"%(url)
+def getvt_subdomains(url):
+     # url = "https://www.virustotal.com/ui/domains/%s/subdomains"%(url)
     headers = {"user-agent": random.choice(list(config))}
     req = requests.get(url, verify=True, headers=headers)
     try:
@@ -95,11 +92,32 @@ def getSubdomains(url):
         for val in js['data']:
             listJson.append(val['id'])
         next = js['links']['next']
-        getSubdomains(next) #递归
+        getvt_subdomains(next) #递归
     except KeyError:
         pass
 
+def getbaidu_subdomains(url):
+	try:
+		headers = {"user-agent": random.choice(list(config))}
+		req = requests.get("http://ce.baidu.com/index/getRelatedSites?site_address="+url,headers=headers)
+		js = json.loads(req.text)
+		for val in js['data']:
+			listJson.append(val['domain'])
+	except KeyError:
+		pass
+	
 
+
+def chinaz_subdomains(url):
+    try:
+        headers = {"user-agent": random.choice(list(config))}
+        req = requests.get("http://s.tool.chinaz.com/same?s="+url,headers=headers)
+        html = req.text
+        ss = re.findall('target=\_blank\>(.*?)\<\/a\>\<\/div\>',html,re.S)
+        for val in ss:
+        	listJson.append(val)
+    except:
+    	pass
 def getip_address(ip):
 	headers = {"user-agent": random.choice(list(config))}
 	req = requests.get("http://ip.soshoulu.com/ajax/shoulu.ashx?_type=ipsearch&ip="+str(ip),headers=headers)
@@ -108,7 +126,14 @@ def getip_address(ip):
 def show():
     banner ="CiBfICAgXyBfICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBfICAgICAgICAgICAgICAgICAgICAgICBfICAgICAgIAp8IFwgfCB8IHxfIF9fXyAgX18gXyBfIF9fIF9fXyAgICAgICAgX198IHwgX19fICBfIF9fIF9fXyAgIF9fIF8oXylfIF9fICAKfCAgXHwgfCBfXy8gXyBcLyBfYCB8ICdfXy8gX198X19fX18gLyBfYCB8LyBfIFx8ICdfIGAgXyBcIC8gX2AgfCB8ICdfIFwgCnwgfFwgIHwgfHwgIF9fLyAoX3wgfCB8ICBcX18gXF9fX19ffCAoX3wgfCAoXykgfCB8IHwgfCB8IHwgKF98IHwgfCB8IHwgfAp8X3wgXF98XF9fXF9fX3xcX18sX3xffCAgfF9fXy8gICAgICBcX18sX3xcX19fL3xffCB8X3wgfF98XF9fLF98X3xffCB8X3wK"
     print base64.b64decode(banner)
-    print "Usage: test.py baidu.com 1\t|| 1 is IP anti inspection\t|| 2 is Subdomains"
+    print "Usage: virustotal.py baidu.com 1\t|| 1 is IP domains\t|| 2 is Subdomains\t|| all is alldomain"
+
+def get_alldomain(url):
+	chinaz_subdomains(url)
+	getJson(url=url,pan="2")
+	getbaidu_subdomains(url)
+	return list(set(listJson))
+
 if __name__ == "__main__":
     if(len(sys.argv)<3):
         show()
@@ -117,11 +142,26 @@ if __name__ == "__main__":
         getJson(str(sys.argv[1]), pan=str(sys.argv[2]))
         for val in listJson:
             print "%s"%(val)
+        
+        print "--------------------------------------\ncount >> "+str(len(listJson))
     if  str(sys.argv[2])=="1":
     	getJson(str(sys.argv[1]), pan=str(sys.argv[2]))
         if re.match(r"^([0-9]{1,3}\.){3}[0-9]{1,3}$",str(sys.argv[1])):
             for val in listJson:
                 print "%s"%(val['host_name']) 	
+
+            print "--------------------------------------\ncount >> "+str(len(listJson))
+     		
         else:
             for val in listJson:
                 print "%s"%(getip_address(str(val['ip_address'])))
+            print "--------------------------------------\ncount >> "+str(len(listJson))
+     		
+    elif str(sys.argv[2])=="all":
+     	listdomain = get_alldomain(str(sys.argv[1]))
+     	for val in listdomain:
+     		print val
+     	print "--------------------------------------"
+     	print "count >> %s"%(str(len(listJson)))
+     		
+    	
