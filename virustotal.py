@@ -1,12 +1,5 @@
  #-*- coding: utf-8 -*-
-"""
--------------------------------------------------
-   File Name：     virustotal
-   Description :
-   Author :       Ntears
-   date：          2018/8/16
-"""
-__author__ = 'Ntears'
+
 
 import requests
 import json
